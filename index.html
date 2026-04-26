@@ -108,6 +108,35 @@
       word-break: break-word;
     }
 
+    .meta-value {
+      margin: 0 0 10px;
+    }
+
+    .email-trigger {
+      padding: 9px 14px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.72);
+      color: var(--ink);
+      font: inherit;
+      cursor: pointer;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .email-trigger:hover,
+    .email-trigger:focus-visible {
+      background: var(--accent-soft);
+      border-color: rgba(147, 95, 45, 0.35);
+      outline: none;
+    }
+
+    .email-note {
+      margin: 4px 0 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
     .content {
       display: grid;
       gap: 28px;
@@ -186,8 +215,10 @@
         <div class="meta">
           <div class="meta-block">
             <p class="meta-label">Email</p>
-            <p class="meta-value"><a href="mailto:rayyoungsagacity@gmail.com">rayyoungsagacity@gmail.com</a></p>
-            <p class="meta-value"><a href="mailto:yangrui55@meituan.com">yangrui55@meituan.com</a></p>
+            <p class="meta-value"><button class="email-trigger" type="button" data-email-key="personal">Show personal email</button></p>
+            <p class="meta-value"><button class="email-trigger" type="button" data-email-key="work">Show work email</button></p>
+            <p class="email-note">Emails are revealed only after a click to reduce simple scraping.</p>
+            <noscript><p class="email-note">Enable JavaScript to reveal contact emails.</p></noscript>
           </div>
           <div class="meta-block">
             <p class="meta-label">Affiliation</p>
@@ -220,5 +251,37 @@
       </footer>
     </main>
   </div>
+  <script>
+    (function () {
+      var emailBook = {
+        personal: [121, 106, 114, 114, 100, 126, 101, 108, 120, 106, 108, 106, 104, 98, 127, 114, 75, 108, 102, 106, 98, 103, 37, 104, 100, 102],
+        work: [114, 106, 101, 108, 121, 126, 98, 62, 62, 75, 102, 110, 98, 127, 126, 106, 101, 37, 104, 100, 102]
+      };
+      var key = 11;
+
+      function decodeEmail(bytes) {
+        return bytes.map(function (value) {
+          return String.fromCharCode(value ^ key);
+        }).join("");
+      }
+
+      document.querySelectorAll("[data-email-key]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          var emailKey = button.getAttribute("data-email-key");
+          var encoded = emailBook[emailKey];
+          if (!encoded) {
+            return;
+          }
+
+          var email = decodeEmail(encoded);
+          var link = document.createElement("a");
+          link.href = "mailto:" + email;
+          link.textContent = email;
+          link.setAttribute("aria-label", email);
+          button.replaceWith(link);
+        }, { once: true });
+      });
+    }());
+  </script>
 </body>
 </html>
